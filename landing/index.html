@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>QFInstall</title>
+<meta name="description" content="QFInstall — launch Aether Shunt 3 and more." />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    /* Orange gradient canvas — bright top, deep burnt bottom */
+    background: linear-gradient(180deg, #ff7300 0%, #e85d04 35%, #b33806 70%, #6f1d08 100%);
+    display: flex;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ---- Left sidebar ---- */
+  aside {
+    width: 340px;
+    min-width: 280px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 18px 0;
+  }
+  .side-stack {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-radius: 6px 6px 0 0;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  }
+  .side-header {
+    height: 26px;
+    background: #f0a050;
+    border: 1px solid rgba(120, 60, 10, 0.4);
+    border-bottom: none;
+  }
+  .side-panel {
+    flex: 1;
+    background: radial-gradient(ellipse at 45% 55%, #fffdf2 0%, #faf0cf 45%, #f3e3b8 100%);
+    border: 1px solid #5a4a30;
+    border-radius: 8px;
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .side-footer {
+    height: 64px;
+    background: #a97c72;
+    border: 1px solid rgba(90, 50, 40, 0.4);
+    border-top: none;
+  }
+
+  /* ---- Tabs ---- */
+  .tab-pill {
+    display: block;
+    width: fit-content;
+    padding: 6px 22px;
+    background: #ffffff;
+    border: 2px solid #1a1a1a;
+    border-radius: 10px;
+    font-size: 18px;
+    color: #111;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .tab-blue {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, #cde9f6 0%, #a8d4ec 100%);
+    border: 2px solid #4a90b8;
+    border-radius: 10px;
+    font-size: 19px;
+    color: #1f2937;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .tab-pill:hover, .tab-blue:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  }
+  .tab-pill.active, .tab-blue.active { outline: 3px solid #ff7300; outline-offset: 2px; }
+
+  /* ---- Content area ---- */
+  main {
+    flex: 1;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 64px 72px;
+    color: #fff;
+  }
+  .panel { display: none; max-width: 720px; animation: fadeIn 0.3s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  h1 { font-size: 40px; margin-bottom: 12px; text-shadow: 0 2px 12px rgba(0,0,0,0.35); }
+  .subtitle { font-size: 17px; line-height: 1.65; color: #ffe8d6; margin-bottom: 32px; }
+  .card {
+    background: rgba(255, 253, 242, 0.95);
+    color: #2a2118;
+    border: 1px solid #5a4a30;
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 10px 36px rgba(0,0,0,0.3);
+  }
+  .card h2 { font-size: 20px; margin-bottom: 10px; }
+  .card p { font-size: 15px; line-height: 1.6; color: #5a4a36; margin-bottom: 20px; }
+  .launch-btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background: linear-gradient(180deg, #ff8c2b, #e85d04);
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    border: 1px solid #8a3c05;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: filter 0.12s ease, transform 0.12s ease;
+  }
+  .launch-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .badge-soon {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #8a6d3b;
+    border: 1px solid #c9ab6e;
+    border-radius: 99px;
+    padding: 4px 12px;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 720px) {
+    body { flex-direction: column; overflow: auto; }
+    aside { width: 100%; height: auto; padding: 16px 16px 0; }
+    .side-panel { gap: 12px; padding: 20px 16px; }
+    .side-footer { height: 20px; }
+    main { padding: 36px 24px; height: auto; }
+  }
+</style>
+</head>
+<body>
+  <aside>
+    <div class="side-stack">
+      <div class="side-header"></div>
+      <div class="side-panel">
+        <a class="tab-pill" href="/app/" id="tab-aether">aether shunt 3</a>
+        <button class="tab-blue" data-panel="ainme" id="tab-ainme">Ainme</button>
+      </div>
+      <div class="side-footer"></div>
+    </div>
+  </aside>
+
+  <main>
+    <section class="panel active" id="home">
+      <h1>QFInstall</h1>
+      <p class="subtitle">Pick a project from the panel on the left.</p>
+      <div class="card">
+        <h2>Aether Shunt 3</h2>
+        <p>A local-first Cognitive OS for prompt engineering and multi-agent simulation. Runs entirely in your browser — files, history, and settings stay on your device.</p>
+        <a class="launch-btn" href="/app/">Launch Aether Shunt 3 →</a>
+      </div>
+    </section>
+
+    <section class="panel" id="ainme">
+      <h1>Ainme</h1>
+      <p class="subtitle">This one isn't live yet.</p>
+      <div class="card">
+        <span class="badge-soon">COMING SOON</span>
+        <h2>In development</h2>
+        <p>Ainme will appear here when it's ready to launch.</p>
+      </div>
+    </section>
+  </main>
+
+<script>
+  // "aether shunt 3" navigates straight to /app/. "Ainme" switches the right-side panel.
+  const panels = document.querySelectorAll('.panel');
+  const ainme = document.getElementById('tab-ainme');
+  ainme.addEventListener('click', () => {
+    panels.forEach(p => p.classList.remove('active'));
+    document.getElementById('ainme').classList.add('active');
+    ainme.classList.add('active');
+  });
+</script>
+</body>
+</html>

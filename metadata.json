@@ -1,0 +1,10 @@
+{
+  "name": " Aether Shunt version 3",
+  "description": "A professional-grade, local-first interface for advanced AI-driven text transformation, system orchestration, and agentic development. v2.1.0 Optimized.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}

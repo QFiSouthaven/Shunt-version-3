@@ -1,0 +1,130 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aether-shunt.io/schemas/gap-analysis-manifest.json",
+  "title": "Consolidated Architectural Gap Manifest",
+  "description": "Tracking the transformation of the Aether architecture into a high-performance headless data extraction pipeline.",
+  "type": "object",
+  "gap_analysis_summary": {
+    "total_modules_analyzed": 17,
+    "critical_infrastructure_missing": 0,
+    "logic_dependencies_missing": 0
+  },
+  "missing_components": [
+    {
+      "component_name": "Headless Browser Engine",
+      "category": "Network_Infrastructure",
+      "primary_function": "To execute JavaScript, hydrate SPAs, and capture DOM states from external targets.",
+      "impacted_modules": [
+        "agent_builder",
+        "chat",
+        "chronicle",
+        "documentation",
+        "ecosystem",
+        "foundry",
+        "image_analysis",
+        "persistent_developer",
+        "subscription",
+        "weaver"
+      ],
+      "remediation_strategy": "Integrated HeadlessBrowserBridge in scraperService.ts.",
+      "priority": "Critical",
+      "status": "Resolved"
+    },
+    {
+      "component_name": "Proxy Rotation Middleware",
+      "category": "Security_Evasion",
+      "primary_function": "To prevent IP bans by rotating request origins and managing residential proxies.",
+      "impacted_modules": [
+        "agent_builder",
+        "deploy",
+        "foundry",
+        "oraculum",
+        "persistent_developer",
+        "serendipity_engine",
+        "settings",
+        "shunt",
+        "subscription",
+        "system_2001",
+        "tool_for_ai",
+        "weaver"
+      ],
+      "remediation_strategy": "Implemented via ProxyRotationEngine in scraperService.ts.",
+      "priority": "Critical",
+      "status": "Resolved"
+    },
+    {
+      "component_name": "Rate Limiter / Token Bucket",
+      "category": "Concurrency_Control",
+      "primary_function": "To throttle outgoing requests and respect target server limits (Politeness Policy).",
+      "impacted_modules": [
+        "agent_builder",
+        "deploy",
+        "documentation",
+        "ecosystem",
+        "foundry",
+        "image_analysis",
+        "oraculum",
+        "persistent_developer",
+        "serendipity_engine",
+        "settings",
+        "shunt",
+        "system_2001",
+        "tool_for_ai",
+        "weaver"
+      ],
+      "remediation_strategy": "Implemented global TokenBucket throttling in rateLimiter.ts and geminiService.ts.",
+      "priority": "Critical",
+      "status": "Resolved"
+    },
+    {
+      "component_name": "DOM Sanitizer",
+      "category": "Data_Processing",
+      "primary_function": "To strip script/style/svg tags from raw HTML before feeding to LLMs to save tokens.",
+      "impacted_modules": [
+        "agent_builder",
+        "deploy",
+        "foundry",
+        "oraculum",
+        "shunt",
+        "weaver"
+      ],
+      "remediation_strategy": "Implemented via DOMSanitizer whitelisting protocol in scraperService.ts.",
+      "priority": "High",
+      "status": "Resolved"
+    },
+    {
+      "component_name": "Data Egress Transport",
+      "category": "Data_Persistence",
+      "primary_function": "To export extracted data from the UI state to a permanent store (DB/File).",
+      "impacted_modules": [
+        "ecosystem",
+        "oraculum",
+        "serendipity_engine",
+        "subscription",
+        "shunt"
+      ],
+      "remediation_strategy": "Finalized Unified DataSink and bulk export logic in dataSink.ts.",
+      "priority": "High",
+      "status": "Resolved"
+    },
+    {
+      "component_name": "CORS Proxy / HTTP Client",
+      "category": "Network_Infrastructure",
+      "primary_function": "To bypass browser Same-Origin Policy when fetching external resources.",
+      "impacted_modules": [
+        "agent_builder",
+        "chat",
+        "chronicle",
+        "deploy",
+        "oraculum",
+        "shunt",
+        "tool_for_ai",
+        "weaver"
+      ],
+      "remediation_strategy": "Integrated with internal ProxyRotationEngine for server-side routing simulation.",
+      "priority": "Critical",
+      "status": "Resolved"
+    }
+  ]
+}
