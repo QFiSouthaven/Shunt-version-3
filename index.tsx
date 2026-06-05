@@ -1,6 +1,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import 'reactflow/dist/style.css';
+import './styles/globals.css';
 import App from './App';
 import { setupGlobalErrorHandlers } from './utils/errorLogger';
 import ErrorBoundary from './components/ErrorBoundary';
