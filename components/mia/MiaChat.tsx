@@ -4,6 +4,7 @@ import { useMiaContext } from '../../context/MiaContext';
 import { BrainIcon, CodeIcon } from '../icons';
 import { ShuntAction } from '../../types';
 import { performShunt } from '../../services/geminiService';
+import { sanitizeHtml } from '../../utils/sanitizeHtml';
 
 const commandToAction: { [key: string]: ShuntAction } = {
     'summarize': ShuntAction.SUMMARIZE,
@@ -103,7 +104,7 @@ const MiaChat: React.FC = () => {
         {messages.map(msg => (
           <div key={msg.id} className={`mia-message ${msg.sender === 'user' ? 'user' : msg.sender.startsWith('system') ? 'mia' : 'mia'}`}>
             {msg.sender === 'system-progress' && <p className="text-sm italic opacity-80">{msg.text}</p>}
-            {msg.sender !== 'system-progress' && (msg.isHtml ? (<div dangerouslySetInnerHTML={{ __html: msg.text }} />) : (<p>{msg.text}</p>))}
+            {msg.sender !== 'system-progress' && (msg.isHtml ? (<div dangerouslySetInnerHTML={{ __html: sanitizeHtml(msg.text) }} />) : (<p>{msg.text}</p>))}
             
             {msg.diagnosableError && (
                  <button

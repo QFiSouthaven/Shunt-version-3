@@ -61,7 +61,7 @@ export const SafePreview: React.FC<SafePreviewProps> = ({
               console.error("Runtime Error:", err);
               document.body.innerHTML += \`
                 <div style="margin-top:20px; padding:15px; background:#fee2e2; border:1px solid #ef4444; border-radius:8px; color:#b91c1c; font-family:monospace; font-size:12px;">
-                  <strong>KERNEL_PANIC:</strong> \${err.message}
+                  <strong>KERNEL_PANIC:</strong> \${String(err.message).replace(/</g,'&lt;').replace(/>/g,'&gt;')}
                 </div>
               \`;
             }

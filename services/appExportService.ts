@@ -143,6 +143,21 @@ export const generateStandaloneHtml = (app: { name: string; description: string;
             setTimeout(() => copyBtn.innerText = original, 2000);
         });
 
+        // Strip scripts, event handlers and javascript: URLs from AI-generated HTML before display
+        const sanitizeOutput = (html) => {
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            doc.querySelectorAll('script,style,iframe,object,embed,link,meta,form').forEach((el) => el.remove());
+            doc.querySelectorAll('*').forEach((el) => {
+                Array.from(el.attributes).forEach((attr) => {
+                    const isEventHandler = /^on/i.test(attr.name);
+                    const isJsUrl = /^(href|src|xlink:href)$/i.test(attr.name) && /^\\s*javascript:/i.test(attr.value);
+                    if (isEventHandler || isJsUrl) el.removeAttribute(attr.name);
+                });
+            });
+            return doc.body.innerHTML;
+        };
+        const escapeText = (text) => String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
         runBtn.addEventListener('click', async () => {
             const key = apiKeyEl.value.trim();
             const prompt = inputEl.value.trim();
@@ -178,11 +193,11 @@ export const generateStandaloneHtml = (app: { name: string; description: string;
                     }
                 });
 
-                // Render Markdown
-                outputDiv.innerHTML = marked.parse(response.text);
+                // Render Markdown (sanitized: AI output is untrusted)
+                outputDiv.innerHTML = sanitizeOutput(marked.parse(response.text));
                 outputDiv.classList.remove('opacity-50');
             } catch (e) {
-                outputDiv.innerHTML = '<span class="text-red-400 font-bold">Error:</span> ' + e.message;
+                outputDiv.innerHTML = '<span class="text-red-400 font-bold">Error:</span> ' + escapeText(e.message);
                 outputDiv.classList.remove('opacity-50');
                 if(e.message.includes('API key')) {
                     apiKeySection.style.display = 'flex';
