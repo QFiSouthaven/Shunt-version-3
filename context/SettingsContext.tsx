@@ -1,10 +1,10 @@
 
 // context/SettingsContext.tsx
-import React, { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, ReactNode, useCallback, useMemo, useState, useEffect } from 'react';
 import { CustomPrompt } from '../types';
 import { usePersistedState } from '../hooks/usePersistedState';
 import { LocalProvider } from '../services/localLlmService';
-import { encryptString, decryptString } from '../utils/crypto';
+import { encryptStringAsync, decryptStringAsync, isVaultCiphertext } from '../utils/crypto';
 
 export type MasterIntelligenceProvider = 'gemini' | 'local' | 'cloudflare';
 
@@ -81,26 +81,59 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [rawSettings, setRawSettings] = usePersistedState<AppSettings>(SETTINGS_STORAGE_KEY, defaultSettings);
 
-    // Decrypt sensitive fields when reading from persisted state
+    // Plaintext token lives only in memory; localStorage holds AES-GCM ciphertext ("v2:...").
+    const [plainCfToken, setPlainCfToken] = useState<string>('');
+
+    // Decrypt on load, and transparently migrate legacy (v1/plaintext) values to v2.
+    useEffect(() => {
+        let cancelled = false;
+        const stored = rawSettings.cfApiToken;
+        if (!stored) {
+            setPlainCfToken('');
+            return;
+        }
+        (async () => {
+            try {
+                const plain = await decryptStringAsync(stored);
+                if (cancelled) return;
+                setPlainCfToken(plain);
+                // One-time migration: re-encrypt legacy values with real encryption
+                if (plain && !isVaultCiphertext(stored)) {
+                    const upgraded = await encryptStringAsync(plain);
+                    if (!cancelled) {
+                        setRawSettings(prev => ({ ...prev, cfApiToken: upgraded }));
+                    }
+                }
+            } catch {
+                if (!cancelled) setPlainCfToken('');
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [rawSettings.cfApiToken, setRawSettings]);
+
     const settings = useMemo(() => ({
         ...rawSettings,
-        cfApiToken: decryptString(rawSettings.cfApiToken)
-    }), [rawSettings]);
+        cfApiToken: plainCfToken
+    }), [rawSettings, plainCfToken]);
 
     const updateSetting = useCallback(<K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
-        setRawSettings(prevSettings => {
-            let valueToStore = value;
-            
-            // Encrypt sensitive fields before persisting to localStorage
-            if (key === 'cfApiToken' && typeof value === 'string') {
-                valueToStore = encryptString(value) as any;
-            }
-
-            return {
-                ...prevSettings,
-                [key]: valueToStore,
-            };
-        });
+        // Sensitive field: expose plaintext to the app immediately, persist ciphertext asynchronously.
+        if (key === 'cfApiToken' && typeof value === 'string') {
+            setPlainCfToken(value);
+            encryptStringAsync(value)
+                .then(encrypted => {
+                    setRawSettings(prev => ({ ...prev, cfApiToken: encrypted }));
+                })
+                .catch(() => {
+                    // If encryption is unavailable, do not persist the secret at all.
+                    setRawSettings(prev => ({ ...prev, cfApiToken: '' }));
+                });
+            return;
+        }
+        setRawSettings(prevSettings => ({
+            ...prevSettings,
+            [key]: value,
+        }));
     }, [setRawSettings]);
     
     const addCustomPrompt = useCallback((prompt: CustomPrompt) => {
